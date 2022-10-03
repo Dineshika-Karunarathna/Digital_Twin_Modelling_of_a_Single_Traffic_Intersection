@@ -6,13 +6,11 @@ public class SIM {
     public static void main(String[] args) throws FileNotFoundException {
         String originalFile = "original.txt";
         ArrayList<String> originalList = readFile(originalFile);
-        //System.out.println(originalList);
-        //System.out.println(originalList.size());
         String compressedFile = "compressed.txt";
         ArrayList<String> compressedList = readFile(compressedFile);
 
         HashMap<String ,String> dictionary = createDictionary(originalList);
-        System.out.println(dictionary);
+
     }
 
     private static ArrayList<String> readFile(String filePath) throws FileNotFoundException {
@@ -38,7 +36,6 @@ public class SIM {
                 entryFrequency.put(entry,1);
             }
         }
-        System.out.println(entryFrequency);
         ArrayList<Integer> frequencies = new ArrayList<>(entryFrequency.values());
         frequencies.sort(Collections.reverseOrder());
         return selectEntries(entryFrequency, frequencies);
