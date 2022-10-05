@@ -4,11 +4,12 @@ import java.util.*;
 public class SIM {
     public static void main(String[] args) throws IOException {
         String originalFile = "original.txt";
-
+        String compressedFile = "compressed.txt";
         compression(originalFile);
+        decompression(compressedFile);
     }
 
-    public static void compression(String originalFile) throws IOException {
+    private static void compression(String originalFile) throws IOException {
         ArrayList<String> originalList = readFile(originalFile);
         HashMap<String ,String> dictionary = createDictionary(originalList);
         List<String> compressedInstructions = compressionList(originalList);
@@ -27,7 +28,6 @@ public class SIM {
         scanner.close();
         return originalList;
     }
-
 
     private static HashMap<String, String> createDictionary(ArrayList<String> originalList){
         HashMap<String, Integer> entryFrequency = new LinkedHashMap<>();
@@ -96,8 +96,6 @@ public class SIM {
                 }
             }
         }
-
-        System.out.println(compressedInstructions);
         return compressedInstructions;
     }
 
@@ -118,7 +116,6 @@ public class SIM {
             inputInstructions.set(instructionLine, newI);
         }
     }
-
 
     private static String beneficialCompressionFormat(String instruction, HashMap<String, String> dictionary){
         ArrayList<String> compressionFormats = new ArrayList<>();
@@ -250,7 +247,7 @@ public class SIM {
 
     }
 
-    public static void writeCompressedFile(List<String> compressedInstructionList, HashMap<String, String> dictionary) throws IOException {
+    public static void writeCompressedFile(List<String> compressedInstructionList, Map<String, String> dictionary) throws IOException {
         StringBuilder compressedText = new StringBuilder();
 
         for (String compressedInstruction : compressedInstructionList){
@@ -261,7 +258,7 @@ public class SIM {
             compressedText.append("1".repeat(32-addOnes));
         }
 
-        FileWriter compressedFile = new FileWriter("compressed.txt");
+        FileWriter compressedFile = new FileWriter("cout.txt");
         BufferedWriter buffer = new BufferedWriter(compressedFile);
 
         for (int i = 0; i < compressedText.length(); i+=32){
@@ -269,7 +266,7 @@ public class SIM {
             buffer.newLine();
         }
 
-        buffer.write("xxxxxxxx");
+        buffer.write("xxxx");
         buffer.newLine();
 
         for(String dictionaryEntry:  dictionary.keySet()){
@@ -282,4 +279,175 @@ public class SIM {
 
     }
 
+    // Decompression
+
+    private static void decompression (String compressedFile) throws IOException {
+        ArrayList<String> decompressedCodeAndDictionary = readFileToDecompress(compressedFile);
+        HashMap<String,String> dictionary= dictionaryToDecompress(decompressedCodeAndDictionary);
+        ArrayList<String> compressedList = compressedCodeToList(decompressedCodeAndDictionary);
+        ArrayList<String> decompressedList = decompressedList(compressedList, dictionary);
+        writeDecompressedFile(decompressedList);
+    }
+
+    private static ArrayList<String> readFileToDecompress(String filePath) throws FileNotFoundException {
+        File compressedFile = new File(filePath);
+        Scanner scanner = new Scanner(compressedFile);
+        ArrayList<String> decompressedCodeAndDictionary = new ArrayList<>();
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            decompressedCodeAndDictionary.add(line.trim());
+        }
+        scanner.close();
+        return decompressedCodeAndDictionary;
+    }
+
+    private static HashMap<String,String> dictionaryToDecompress(ArrayList<String> decompressedCodeAndDictionary){
+        HashMap<String,String> dictionary = new LinkedHashMap<>();
+        int seperationMarker = decompressedCodeAndDictionary.indexOf("xxxx");
+        for (int i=1;i<9;i++){
+            String dictionaryIndex = Integer.toBinaryString(i-1);
+            dictionaryIndex =("000" + dictionaryIndex).substring(dictionaryIndex.length());
+            dictionary.put(dictionaryIndex, decompressedCodeAndDictionary.get(seperationMarker+i));
+        }
+        return dictionary;
+    }
+
+    private static ArrayList<String> compressedCodeToList (ArrayList<String> decompressedCodeAndDictionary) {
+        StringBuilder compressedCodeString = new StringBuilder();
+        ArrayList<String> compressedList = new ArrayList<>();
+        int seperationMarker = decompressedCodeAndDictionary.indexOf("xxxx");
+        for (int i = 0; i < seperationMarker; i++) {
+            compressedCodeString.append(decompressedCodeAndDictionary.get(i));
+        }
+
+        for (int i = 0; i < compressedCodeString.length()-3; i++) {
+            String header = compressedCodeString.substring(i, i + 3);
+            switch (header) {
+                case "000":
+                    compressedList.add(compressedCodeString.substring(i, i + 5));
+                    i += 4;
+                    break;
+                case "001":
+                    compressedList.add(compressedCodeString.substring(i, i + 15));
+                    i += 14;
+                    break;
+                case "010" , "011":
+                    compressedList.add(compressedCodeString.substring(i, i + 11));
+                    i += 10;
+                    break;
+                case "100":
+                    compressedList.add(compressedCodeString.substring(i, i + 16));
+                    i += 15;
+                    break;
+                case "101":
+                    compressedList.add(compressedCodeString.substring(i, i + 6));
+                    i += 5;
+                    break;
+                case "110":
+                    try {
+                        compressedList.add(compressedCodeString.substring(i, i + 35));
+                        i += 34;
+                    } catch (StringIndexOutOfBoundsException ex) {
+                        break;
+                    }
+                    break;
+            }
+        }
+        return compressedList;
+    }
+
+     private static ArrayList<String> decompressedList (ArrayList<String> compressedList, HashMap<String,String> dictionary){
+        ArrayList<String> decompressedList = new ArrayList<>();
+        for (String compressedPattern: compressedList){
+            String header = compressedPattern.substring(0, 3);
+
+            switch (header) {
+                case "000" -> {
+                    String repeatedInstruction = decompressedList.get(decompressedList.size() - 1);
+                    int repetitiveCount = Integer.parseInt(compressedPattern.substring(3, 5), 2) + 1;
+                    for (int i = 0; i < repetitiveCount; i++) {
+                        decompressedList.add(repeatedInstruction);
+                    }
+                }
+                case "001" -> decompressedList.add(bitMaskBasedDecompression(compressedPattern, dictionary));
+                case "010" -> decompressedList.add(oneBitMismatchDecompression(compressedPattern, dictionary));
+                case "011" -> decompressedList.add(twoBitConsecutiveMismatchDecompression(compressedPattern, dictionary));
+                case "100" -> decompressedList.add(twoBitMismatchDecompression(compressedPattern, dictionary));
+                case "101" -> decompressedList.add(directMatchingDecompression(compressedPattern, dictionary));
+                case "110" -> decompressedList.add(originalBinariesDecompression(compressedPattern));
+            }
+        }
+        return decompressedList;
+    }
+
+    private static String bitMaskBasedDecompression(String compressedPattern, HashMap<String, String> dictionary){
+        String instruction="";
+        String bitMask ="";
+        int startingLocation = Integer.parseInt(compressedPattern.substring(3,8),2);
+        String dictionaryEntry = dictionary.get(compressedPattern.substring(12));
+        bitMask=  ("0".repeat(startingLocation)) + compressedPattern.substring(8,12) + ("0".repeat(28 - startingLocation));
+        instruction = xorOperation(dictionaryEntry,bitMask);
+        return instruction;
+    }
+
+    private static String oneBitMismatchDecompression(String compressedPattern, HashMap<String, String> dictionary){
+        int misMatchLocation = Integer.parseInt(compressedPattern.substring(3,8),2);
+        StringBuilder dictionaryEntry = new StringBuilder(dictionary.get(compressedPattern.substring(8)));
+        char misMatchBit = dictionaryEntry.charAt(misMatchLocation);
+        dictionaryEntry.setCharAt(misMatchLocation,changeBit(misMatchBit));
+        return dictionaryEntry.toString();
+    }
+
+    private static String twoBitConsecutiveMismatchDecompression(String compressedPattern, HashMap<String, String> dictionary){
+        int misMatchLocation = Integer.parseInt(compressedPattern.substring(3,8),2);
+        StringBuilder dictionaryEntry = new StringBuilder(dictionary.get(compressedPattern.substring(8)));
+        char misMatchBit1 = dictionaryEntry.charAt(misMatchLocation);
+        char misMatchBit2 = dictionaryEntry.charAt(misMatchLocation+1);
+        dictionaryEntry.setCharAt(misMatchLocation,changeBit(misMatchBit1));
+        dictionaryEntry.setCharAt(misMatchLocation+1,changeBit(misMatchBit2));
+        return dictionaryEntry.toString();
+    }
+
+    private static String twoBitMismatchDecompression(String compressedPattern, HashMap<String, String> dictionary){
+        int misMatchLocation1 = Integer.parseInt(compressedPattern.substring(3,8),2);
+        int misMatchLocation2 = Integer.parseInt(compressedPattern.substring(8,13),2);
+        StringBuilder dictionaryEntry = new StringBuilder(dictionary.get(compressedPattern.substring(13)));
+        char misMatchBit1 = dictionaryEntry.charAt(misMatchLocation1);
+        char misMatchBit2 = dictionaryEntry.charAt(misMatchLocation2);
+        dictionaryEntry.setCharAt(misMatchLocation1,changeBit(misMatchBit1));
+        dictionaryEntry.setCharAt(misMatchLocation2,changeBit(misMatchBit2));
+        return dictionaryEntry.toString();
+    }
+
+    private static String directMatchingDecompression(String compressedPattern, HashMap<String, String> dictionary){
+        String instruction="";
+        String dictionaryIndex = compressedPattern.substring(3);
+        instruction = dictionary.get(dictionaryIndex);
+        return instruction;
+    }
+
+    private static String originalBinariesDecompression(String compressedPattern){
+        return compressedPattern.substring(3);
+    }
+
+    private static char changeBit (char bit){
+        char changedBit;
+        if (bit=='0') changedBit = '1';
+        else changedBit = '0';
+
+        return changedBit;
+    }
+
+    private static void writeDecompressedFile(ArrayList<String> decompressedList) throws IOException {
+        FileWriter deCompressedFile = new FileWriter("dout.txt");
+        BufferedWriter buffer = new BufferedWriter(deCompressedFile);
+
+        for (String decompressedInstruction : decompressedList){
+            buffer.write(decompressedInstruction);
+            buffer.newLine();
+        }
+
+        buffer.close();
+        deCompressedFile.close();
+    }
 }
