@@ -1,3 +1,5 @@
+/* On my honor, I have neither given nor received unauthorized aid on this assignment */
+
 import java.io.*;
 import java.util.*;
 
@@ -5,8 +7,14 @@ public class SIM {
     public static void main(String[] args) throws IOException {
         String originalFile = "original.txt";
         String compressedFile = "compressed.txt";
-        compression(originalFile);
-        decompression(compressedFile);
+        for(String input: args){
+            if("1".equals(input)){
+                compression(originalFile);
+            }
+            if("2".equals(input)){
+                decompression(compressedFile);
+            }
+        }
     }
 
     private static void compression(String originalFile) throws IOException {
@@ -76,11 +84,8 @@ public class SIM {
 
         for (String entry: originalList){
             String instructionToCompress = entry.trim().substring(0,32);
-
             int consecutiveRepetitions= Integer.parseInt((entry.substring(entry.length()-1)));
-
             String compressedInstruction = beneficialCompressionFormat(instructionToCompress,dictionary);
-
             compressedInstructions.add(compressedInstruction);
 
             if (consecutiveRepetitions>0){
@@ -244,7 +249,6 @@ public class SIM {
         else{
             return "stringA and stringB are not equal in length";
         }
-
     }
 
     public static void writeCompressedFile(List<String> compressedInstructionList, Map<String, String> dictionary) throws IOException {
@@ -259,24 +263,23 @@ public class SIM {
         }
 
         FileWriter compressedFile = new FileWriter("cout.txt");
-        BufferedWriter buffer = new BufferedWriter(compressedFile);
+        BufferedWriter compressedBuffer = new BufferedWriter(compressedFile);
 
         for (int i = 0; i < compressedText.length(); i+=32){
-            buffer.write(compressedText.substring(i,i+32));
-            buffer.newLine();
+            compressedBuffer.write(compressedText.substring(i,i+32));
+            compressedBuffer.newLine();
         }
 
-        buffer.write("xxxx");
-        buffer.newLine();
+        compressedBuffer.write("xxxx");
+        compressedBuffer.newLine();
 
         for(String dictionaryEntry:  dictionary.keySet()){
-            buffer.write(dictionaryEntry);
-            buffer.newLine();
+            compressedBuffer.write(dictionaryEntry);
+            compressedBuffer.newLine();
         }
 
-        buffer.close();
+        compressedBuffer.close();
         compressedFile.close();
-
     }
 
     // Decompression
@@ -439,15 +442,15 @@ public class SIM {
     }
 
     private static void writeDecompressedFile(ArrayList<String> decompressedList) throws IOException {
-        FileWriter deCompressedFile = new FileWriter("dout.txt");
-        BufferedWriter buffer = new BufferedWriter(deCompressedFile);
+        FileWriter decompressedFile = new FileWriter("dout.txt");
+        BufferedWriter decompressedBuffer = new BufferedWriter(decompressedFile);
 
         for (String decompressedInstruction : decompressedList){
-            buffer.write(decompressedInstruction);
-            buffer.newLine();
+            decompressedBuffer.write(decompressedInstruction);
+            decompressedBuffer.newLine();
         }
 
-        buffer.close();
-        deCompressedFile.close();
+        decompressedBuffer.close();
+        decompressedFile.close();
     }
 }
