@@ -1,15 +1,18 @@
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 
 public class SIM {
-    public static void main(String[] args) throws FileNotFoundException {
-        String originalFile = "original2.txt";
-        ArrayList<String> originalList = readFile(originalFile);
-        //String compressedFile = "compressed.txt";
-        //ArrayList<String> compressedList = readFile(compressedFile);
+    public static void main(String[] args) throws IOException {
+        String originalFile = "original.txt";
 
-        compression(originalList);
+        compression(originalFile);
+    }
+
+    public static void compression(String originalFile) throws IOException {
+        ArrayList<String> originalList = readFile(originalFile);
+        HashMap<String ,String> dictionary = createDictionary(originalList);
+        List<String> compressedInstructions = compressionList(originalList);
+        writeCompressedFile(compressedInstructions, dictionary);
     }
 
     private static ArrayList<String> readFile(String filePath) throws FileNotFoundException {
@@ -25,6 +28,7 @@ public class SIM {
         return originalList;
     }
 
+
     private static HashMap<String, String> createDictionary(ArrayList<String> originalList){
         HashMap<String, Integer> entryFrequency = new LinkedHashMap<>();
         for (String entry: originalList){
@@ -37,10 +41,10 @@ public class SIM {
         }
         ArrayList<Integer> frequencies = new ArrayList<>(entryFrequency.values());
         frequencies.sort(Collections.reverseOrder());
-        return selectEntries(entryFrequency, frequencies);
+        return selectDictionaryEntries(entryFrequency, frequencies);
     }
 
-    private static HashMap<String, String> selectEntries(HashMap<String,Integer> entryFrequency, ArrayList<Integer> frequencies){
+    private static HashMap<String, String> selectDictionaryEntries(HashMap<String,Integer> entryFrequency, ArrayList<Integer> frequencies){
         HashMap<String, String> dictionaryEntries = new LinkedHashMap<>();
         for (int i=0; i<8; i++) {
             String binaryValue = Integer.toBinaryString(i);
@@ -63,19 +67,20 @@ public class SIM {
         return dictionaryEntries;
     }
 
-    private static void compression(ArrayList<String> originalList){
+    private static ArrayList<String> compressionList(ArrayList<String> originalList){
         ArrayList<String> compressedInstructions = new ArrayList<>();
 
         HashMap<String ,String> dictionary = createDictionary(originalList);
-        System.out.println(dictionary);
 
         checkConsecutiveRepetitions (originalList);
 
         for (String entry: originalList){
-            String instructionToCompress = entry.substring(0,32);
+            String instructionToCompress = entry.trim().substring(0,32);
+
             int consecutiveRepetitions= Integer.parseInt((entry.substring(entry.length()-1)));
 
             String compressedInstruction = beneficialCompressionFormat(instructionToCompress,dictionary);
+
             compressedInstructions.add(compressedInstruction);
 
             if (consecutiveRepetitions>0){
@@ -91,7 +96,9 @@ public class SIM {
                 }
             }
         }
+
         System.out.println(compressedInstructions);
+        return compressedInstructions;
     }
 
     private static void checkConsecutiveRepetitions (ArrayList<String> inputInstructions){
@@ -123,9 +130,9 @@ public class SIM {
         compressionFormats.add(directMatchingCompression(instruction, dictionary));
         compressionFormats.add(originalBinariesCompression(instruction));
 
-        String beneficialCompression = compressionFormats.get(0);
+        String beneficialCompression = compressionFormats.get(5);
         for (String format: compressionFormats) {
-            if (format.length()>2 && (format.length() < beneficialCompression.length())) {
+            if (!format.equals("NA") && (format.length() < beneficialCompression.length())){
                 beneficialCompression = format;
             }
         }
@@ -134,46 +141,145 @@ public class SIM {
 
     private static String rleCompression(int rleCount){
         String countToBinary = Integer.toBinaryString(rleCount-1);
-
+        countToBinary=("00" + countToBinary).substring(countToBinary.length());
         return "000"+ countToBinary;
     }
 
     private static String bitMaskBasedCompression(String instruction, HashMap<String, String> dictionary){
-        StringBuilder compressedInstruction = new StringBuilder("001");
+        String compressedInstruction = "NA";
+        for (Map.Entry<String, String> dictionaryEntry : dictionary.entrySet()){
 
-        return compressedInstruction.toString();
+            String xorResult = xorOperation(instruction,dictionaryEntry.getKey());
+            int startingLocation=xorResult.indexOf("1");
+
+            if ((startingLocation!=-1) && (startingLocation <= xorResult.length()-4)) {
+                if (((startingLocation + 4) == xorResult.length()) || (!xorResult.substring(startingLocation + 4).contains("1"))) {
+                    String bitMask = xorResult.substring(startingLocation, startingLocation + 4);
+                    String startingBit = Integer.toBinaryString(startingLocation);
+                    startingBit=("00000" + startingBit).substring(startingBit.length());
+                    String dictionaryIndex = dictionaryEntry.getValue();
+
+                    compressedInstruction = "001" + startingBit + bitMask + dictionaryIndex;
+                    break;
+                }
+            }
+        }
+        return compressedInstruction;
     }
 
     private static String oneBitMismatchCompression(String instruction, HashMap<String, String> dictionary){
-        StringBuilder compressedInstruction = new StringBuilder("010");
+        String compressedInstruction = "NA";
+        for (Map.Entry<String, String> dictionaryEntry : dictionary.entrySet()) {
+            String xorResult = xorOperation(instruction, dictionaryEntry.getKey());
+            if (xorResult.chars().filter(ch -> ch == '1').count() == 1) {
+                String mismatchLocation = Integer.toBinaryString(xorResult.indexOf("1"));
+                mismatchLocation=("00000" + mismatchLocation).substring(mismatchLocation.length());
+                String dictionaryIndex = dictionaryEntry.getValue();
 
-        return compressedInstruction.toString();
+                compressedInstruction = "010" + mismatchLocation+ dictionaryIndex;
+                break;
+            }
+        }
+        return compressedInstruction;
     }
 
     private static String twoBitConsecutiveMismatchCompression(String instruction, HashMap<String, String> dictionary){
-        StringBuilder compressedInstruction = new StringBuilder("011");
+        String compressedInstruction = "NA";
+        for (Map.Entry<String, String> dictionaryEntry : dictionary.entrySet()) {
+            String xorResult = xorOperation(instruction, dictionaryEntry.getKey());
+            int consecutiveMisMatch = xorResult.indexOf("11");
+            if(consecutiveMisMatch != -1 && xorResult.indexOf("1",consecutiveMisMatch+2)==-1){
+                String mismatchLocation = Integer.toBinaryString(consecutiveMisMatch);
+                mismatchLocation = ("00000" + mismatchLocation).substring(mismatchLocation.length());
+                String dictionaryIndex = dictionaryEntry.getValue();
 
-        return compressedInstruction.toString();
+                compressedInstruction = "011" + mismatchLocation + dictionaryIndex;
+                break;
+            }
+        }
+        return compressedInstruction;
     }
 
     private static String twoBitMismatchCompression(String instruction, HashMap<String, String> dictionary){
-        StringBuilder compressedInstruction = new StringBuilder("100");
+        String compressedInstruction = "NA";
+        for (Map.Entry<String, String> dictionaryEntry : dictionary.entrySet()) {
+            String xorResult = xorOperation(instruction, dictionaryEntry.getKey());
+            if (xorResult.chars().filter(ch -> ch == '1').count() ==2) {
+                int firstMismatch = xorResult.indexOf("1");
+                String mismatchLocation1 = Integer.toBinaryString(firstMismatch);
+                mismatchLocation1 = ("00000" + mismatchLocation1).substring(mismatchLocation1.length());
+                int secondmismatch = xorResult.indexOf("1", firstMismatch+1);
+                String mismatchLocation2 = Integer.toBinaryString(secondmismatch);
+                mismatchLocation2 = ("00000" + mismatchLocation2).substring(mismatchLocation2.length());
+                String dictionaryIndex = dictionaryEntry.getValue();
 
-        return compressedInstruction.toString();
+                compressedInstruction = "100" + mismatchLocation1 + mismatchLocation2 + dictionaryIndex;
+                break;
+            }
+        }
+
+        return compressedInstruction;
     }
 
     private static String directMatchingCompression(String instruction, HashMap<String, String> dictionary){
-        StringBuilder compressedInstruction = new StringBuilder("101");
+        String compressedInstruction = "NA";
         for(Map.Entry<String, String> entry : dictionary.entrySet()){
             if (instruction.equals(entry.getKey())){
-                compressedInstruction.append(entry.getValue());
+                compressedInstruction="101"+entry.getValue();
             }
         }
-        return compressedInstruction.toString();
+        return compressedInstruction;
     }
 
     private static String originalBinariesCompression(String instruction){
 
         return "110" + instruction;
     }
+
+    private static String xorOperation (String stringA, String stringB){
+        StringBuilder answer = new StringBuilder();
+        if (stringA.length()==stringB.length()) {
+            for (int i = 0; i < stringA.length(); i++) {
+                answer.append(stringA.charAt(i) ^ stringB.charAt(i));
+            }
+            return answer.toString();
+        }
+        else{
+            return "stringA and stringB are not equal in length";
+        }
+
+    }
+
+    public static void writeCompressedFile(List<String> compressedInstructionList, HashMap<String, String> dictionary) throws IOException {
+        StringBuilder compressedText = new StringBuilder();
+
+        for (String compressedInstruction : compressedInstructionList){
+            compressedText.append(compressedInstruction);
+        }
+        int addOnes = compressedText.length()%32;
+        if (addOnes>0){
+            compressedText.append("1".repeat(32-addOnes));
+        }
+
+        FileWriter compressedFile = new FileWriter("compressed.txt");
+        BufferedWriter buffer = new BufferedWriter(compressedFile);
+
+        for (int i = 0; i < compressedText.length(); i+=32){
+            buffer.write(compressedText.substring(i,i+32));
+            buffer.newLine();
+        }
+
+        buffer.write("xxxxxxxx");
+        buffer.newLine();
+
+        for(String dictionaryEntry:  dictionary.keySet()){
+            buffer.write(dictionaryEntry);
+            buffer.newLine();
+        }
+
+        buffer.close();
+        compressedFile.close();
+
+    }
+
 }
