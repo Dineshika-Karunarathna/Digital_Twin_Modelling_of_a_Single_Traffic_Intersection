@@ -18,3 +18,24 @@ G = ox.add_edge_travel_times(G)
 projected_graph = ox.project_graph(G, to_crs="EPSG:3395")
 Gc = ox.consolidate_intersections(projected_graph, dead_ends=True)
 edges = ox.graph_to_gdfs(ox.get_undirected(Gc), nodes=False)
+
+vehnumber = 10
+routes = []
+route = []
+allAngleList = []
+direction = []
+all_route_roadnames = []
+all_route_speeds = []
+
+angleList = []
+direzione = []
+route_roadnames = []
+route_speed = []
+
+LEFT_SIG = ""
+STRAIGHT_SIG = ""
+RIGHT_SIG = ""
+
+columns = ['vehID', 'subroute', 'speed', 'turn', 'angle', 'lengthOfSubroute']
+data = []
+df = pd.DataFrame()
