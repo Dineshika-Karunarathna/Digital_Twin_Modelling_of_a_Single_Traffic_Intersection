@@ -73,3 +73,50 @@ for iroute in range(vehnumber):
         direzione = []
         route_roadnames = []
         route_speed = []
+         ## iterate through roads (i.e. edges) in a route
+        for irou in route:
+            
+            incident_edges = edges[(edges['u_original']==irou) | (edges['v_original']==irou)]
+            
+            for _, edge in incident_edges.fillna('').iterrows():
+                #print("vehID: ", iroute, " Road name: ", edge['name'], ", ", "Speed: ", edge['speed_kph'], " kmph")
+                instantroad = edge['name']
+                instantspd = edge['speed_kph']
+                route_roadnames.append(edge['name'])
+                route_speed.append(edge['speed_kph'])
+                
+                latlat = G.nodes[irou]['y']
+                lonlon = G.nodes[irou]['x']
+
+                #print("Left! {:.3f} degrees.".format(turnAngle['azi1']))
+                direzione.append("straight")
+                
+                TURN_SIG = "straight"
+                
+                #print("GPS Coordinates: ", latlat, ", ", lonlon)
+                turnAngle = geod.Inverse(latlat,lonlon,y0,x0)
+
+                if turnAngle['azi1'] > 45.0 and turnAngle['azi1'] < 135.0:
+                    #print("Right! {:.3f} degrees.".format(turnAngle['azi1']))
+                    direzione.append("right")
+                 
+                    TURN_SIG = "right"
+                if (turnAngle['azi1'] > -135.0 and turnAngle['azi1'] < -45.0):
+                   #print("Left! {:.3f} degrees.".format(turnAngle['azi1']))
+                    direzione.append("left")
+                    TURN_SIG = "left"
+                  
+                y0 = latlat
+                x0 = lonlon
+                
+                angleList.append(turnAngle['azi1'])
+
+                values = [iroute, instantroad, instantspd, TURN_SIG, turnAngle['azi1'], edge.get('length', None)]
+                zipped = zip(columns, values)
+                a_dictionary = dict(zipped)
+                #print(a_dictionary)
+                data.append(a_dictionary)
+
+            df = df.append(data, True)
+            
+            my_dict = {i:round(direzione.count(i)/len(direzione)*100.0,1) for i in direzione}
