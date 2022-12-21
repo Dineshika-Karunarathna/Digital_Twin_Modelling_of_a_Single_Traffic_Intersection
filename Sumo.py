@@ -120,3 +120,19 @@ for iroute in range(vehnumber):
             df = df.append(data, True)
             
             my_dict = {i:round(direzione.count(i)/len(direzione)*100.0,1) for i in direzione}
+                     #print("vehID: ", iroute, " Total route length: ", lor, " km. ", "TurnRatio: ", my_dict)
+      
+    except:
+        
+        pass
+
+    routes.append(route)
+    allAngleList.append(angleList)
+    direction.append(direzione)
+    all_route_roadnames.append(route_roadnames)
+    all_route_speeds.append(route_speed)
+
+##Generate output file
+#df.to_csv("output.csv")
+
+print("No. of Vehicles/Routes: ", len(routes))
