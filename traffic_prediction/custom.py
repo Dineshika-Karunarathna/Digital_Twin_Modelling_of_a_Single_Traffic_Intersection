@@ -45,3 +45,6 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
 model = NeuralNetwork()
 model.build((1, 28, 28))
 model.summary()
+
+model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
+model.fit(training_images, training_labels, epochs=5)
