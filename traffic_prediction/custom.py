@@ -37,3 +37,11 @@ class NeuralNetwork(tf.keras.Model):
   def call(self, x: tf.Tensor) -> tf.Tensor:
     y_prime = self.sequence(x)
     return y_prime
+  
+model = NeuralNetwork()
+loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+
+model = NeuralNetwork()
+model.build((1, 28, 28))
+model.summary()
