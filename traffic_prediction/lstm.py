@@ -30,3 +30,13 @@ def split_sequence(sequence, n_steps):
 		X.append(seq_x)
 		y.append(seq_y)
 	return np.array(X), np.array(y)
+
+def neurons():
+	neurons = []
+	for i in range(1, 100):
+		neurons.append(i)
+	#return neurons
+	# define model
+	learning_rate = 0.1
+	batch_size = 64
+
