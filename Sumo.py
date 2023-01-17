@@ -136,3 +136,38 @@ for iroute in range(vehnumber):
 #df.to_csv("output.csv")
 
 print("No. of Vehicles/Routes: ", len(routes))
+# Extrat coordinates of route nodes 
+route_coorindates = []
+
+for rou in routes:
+    points = []
+    for node_id in rou:
+        x = projected_graph.nodes[node_id]['x']
+        y = projected_graph.nodes[node_id]['y']
+        points.append([x, y])
+        
+    route_coorindates.append(points)
+
+n_routes = len(route_coorindates)
+
+print("Extracted routes: ", n_routes)
+max_route_len = max([len(x) for x in route_coorindates])
+
+# Prepare the layout
+gdf = ox.geometries_from_bbox(6.92216, 6.92019, 79.87877, 79.87732, tags={"building": True})
+gdf_proj = ox.project_gdf(gdf, to_crs="EPSG:3395")
+
+fig, ax = ox.plot_graph(projected_graph, node_size=0, edge_linewidth=1.5, edge_color='#2C2E2C', show=False, close=False, bgcolor='#12830E') #figsize=(12,8) for larger plots  
+
+gdf_proj.plot(ax=ax, linewidth=1, alpha=0.8, color='#F5F5DC')
+
+scatter_list = []
+
+# Plot the first scatter plot (starting nodes = initial car locations)
+for j in range(n_routes):
+    scatter_list.append(ax.scatter(route_coorindates[j][0][0], # x coordiante of the first node of the j route
+                                   route_coorindates[j][0][1], # y coordiante of the first node of the j route
+                                   label=f'car {j}', 
+                                   alpha=.75))
+    
+#plt.legend(frameon=False)
