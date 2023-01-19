@@ -171,3 +171,28 @@ for j in range(n_routes):
                                    alpha=.75))
     
 #plt.legend(frameon=False)
+def animate(i):
+   
+    # Iterate over all routes
+    for j in range(n_routes):
+        # Some routes are shorter than others
+        # Therefore we need to use try except with continue construction
+        try:
+            # Try to plot a scatter plot
+            x_j = route_coorindates[j][i][0]
+            y_j = route_coorindates[j][i][1]
+            scatter_list[j].set_offsets(np.c_[x_j, y_j])
+        except:
+            continue
+
+# Make the animation
+#animation = FuncAnimation(fig, animate, frames=max_route_len)
+
+line_ani = animation.FuncAnimation(fig, animate, interval=1)
+
+plt.show()  
+#line_ani.save('myAnimation.gif') #writer='imagemagick', fps=24, dpi=300)
+# HTML(animation.to_jshtml()) # to display animation in Jupyter Notebook
+#line_ani.save('animation.mp4', dpi=300) # to save animation
+#line_ani.save('lines.mp4', writer=writer)
+
