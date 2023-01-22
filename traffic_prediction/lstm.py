@@ -4,6 +4,7 @@ import pandas as pd
 from sklearn import linear_model
 from sklearn import *
 
+from  WinGen import split_sequence
 
 trafficData=pd.read_csv('D:\\Acedamic\\FYP\\Codes\\Datasets\\tdata.csv', usecols=[2])
 dataset=trafficData.values
