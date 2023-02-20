@@ -29,3 +29,13 @@ def split_sequence(sequence, n_steps):
 		X.append(seq_x)
 		y.append(seq_y)
 	return array(X), array(y)
+
+train_size = int(len(dataset) * 0.66)
+test_size = len(dataset) - train_size
+train, test = dataset[0:train_size,:], dataset[train_size:len(dataset),:]
+trainX, trainY = split_sequence(train, n_steps)
+print(trainX.size)
+testX, testY = split_sequence(test, n_steps)
+# define input sequence
+#raw_seq = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+# choose a number of time steps
