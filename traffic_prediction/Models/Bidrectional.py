@@ -50,3 +50,21 @@ n_features = 1
 #testX = testX.reshape((testX.shape[0], testX.shape[1], n_features))
 testY_flat=testY.reshape(-1)
 plt.plot(testY_flat)
+
+
+#Bidirectional LSTM
+# reshape input to be [samples, time steps, features]
+trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
+testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
+#
+##For some sequence forecasting problems we may need LSTM to learn
+## sequence in both forward and backward directions
+from keras.layers import Bidirectional
+model = Sequential()
+model.add(Bidirectional(LSTM(50, activation='relu'), input_shape=(None, seq_size)))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mean_squared_error')
+model.fit(trainX, trainY, epochs=5, verbose=1)
+
+model.summary()
+print('Train...')
