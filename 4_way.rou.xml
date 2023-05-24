@@ -1,0 +1,22 @@
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+  
+	  <vType id ="car" vClass= "passenger" length="5" accel="3.5" decel="2.2" sigma="1.0" maxSpeed="8" />  
+	  <vType id= "ev" vClass="emergency" length="7" accel="5.5" decel="2.2" sigma="1.0" maxSpeed="20" guiShape="emergency" speedFactor="2.0" minGapLat="0.2"/>  
+	  <vType id= "bus" vClass="bus" length="7" accel="5.5" decel="2.2" sigma="1.0" maxSpeed="5" color="0,0,1"/>  
+	  <vType id= "motorcycle" vClass="motorcycle" length="5" accel="5.5" decel="2.2" sigma="1.0" maxSpeed="5" color="1,0,1"/>  
+	  <vType id= "taxi" vClass="taxi" length="4" accel="5.5" decel="2.2" sigma="1.0" maxSpeed="5" color="255,0,0"/>  
+  
+  
+   <flow id="N_E_flow" type="car" begin="0" end="0" number="87" from=" E4" to=" E1" />
+   <flow id="N_S_flow" type="bus" begin="0" end="0" number="85" from=" E4" to="E3" />
+   <flow id="N_W_flow" type="taxi" begin="0" end="0" number="85" from="E4" to="-E0" />
+   <flow id="E_N_flow" type="motorcycle" begin="0" end="0" number="76" from="-E1" to="-E4" />
+   <flow id="E_S_flow" type="bus" begin="0" end="0" number="45" from=" -E1" to="E3" />
+   <flow id="E_W_flow" type="ev" begin="0" end="0" number="35" from=" -E1" to=" -E0" />
+   <flow id="S_N_flow" type="car" begin="0" end="0" number="87" from=" -E3" to=" -E4" />
+   <flow id="S_E_flow" type="bus" begin="0" end="0" number="100" from=" -E3" to="E1" />
+   <flow id="S_W_flow" type="taxi" begin="0" end="0" number="56" from="-E3" to="-E0" />
+   <flow id="W_N_flow" type="motorcycle" begin="0" end="0" number="150" from="E0" to="-E4" />
+   <flow id="W_E_flow" type="bus" begin="0" end="0" number="46" from=" E0" to="E1" />
+   <flow id="W_S_flow" type="ev" begin="0" end="0" number="122" from=" E0" to="E3" />
+</routes>
