@@ -13,6 +13,4 @@ def split_sequence(sequence, n_steps):
 		X.append(seq_x)
 		y.append(seq_y)
 	return np.array(X), np.array(y)
-def s():
-	print('split complete')
-	return 0
+
