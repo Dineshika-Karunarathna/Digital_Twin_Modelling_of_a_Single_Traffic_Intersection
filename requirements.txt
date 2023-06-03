@@ -1,0 +1,6 @@
+...
+protobuf==3.20.*
+tensorflow==2.5.0
+
+pip3 uninstall tensorflow absl-py astunparse flatbuffers gast google-pasta grpcio h5py keras keras-preprocessing libclang numpy opt-einsum protobuf setuptools six tensorboard tensorflow-io-gcs-filesystem termcolor tf-estimator-nightly typing-extensions wrapt
+pip3 install --disable-pip-version-check --no-cache-dir tensorflow
