@@ -13,3 +13,6 @@ import file_handler
 dataset=file_handler.get_data('cleanedkaggleTrafic.csv')
 
 print(dataset)
+plt.plot(dataset)
+plt.show()
+print(len(dataset))
