@@ -7,7 +7,7 @@ from keras.layers import Dense
 import pandas as pd
 import matplotlib.pyplot as plt
 import file_handler
-import scaler
+import scale
 import split_data
 import lstm_mod
 
@@ -20,7 +20,10 @@ plt.plot(dataset)
 plt.show()
 print(len(dataset))
 
-dataset= scaler.scale_data(dataset)
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler(feature_range=(0, 1))
+
+dataset= scale.scale_data(dataset,scaler)
 print(dataset)
 
 n_steps=24
@@ -61,5 +64,64 @@ epochs=2
 
 
 
-lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+model=lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
 
+train_predict = model.predict(trainX, verbose=0)
+test_predict = model.predict(testX, verbose=0)
+
+print(train_predict)
+
+
+Scaled_trainPredict = scaler.inverse_transform(train_predict)
+Scaled_trainY = scaler.inverse_transform(trainY)
+Scaled_testPredict = scaler.inverse_transform(test_predict)
+Scaled_testY = scaler.inverse_transform(testY)
+
+trainY_flat=Scaled_trainY.reshape(-1)
+plt.plot(trainY_flat)
+
+trainPredict_flat=Scaled_trainPredict.reshape(-1)
+plt.plot(trainPredict_flat)
+plt.legend('Ground Turth','Prediction')
+plt.show()
+
+
+plt.figure(figsize=(10, 5))
+plt.plot(Scaled_trainY[:48], label="Ground Turth")
+plt.plot(trainPredict_flat[:48],label="Prediction")
+plt.legend(loc="upper left")
+
+plt.show()
+
+testY_flat=Scaled_testY.reshape(-1)
+plt.plot(testY_flat)
+testPredict_flat=Scaled_testPredict.reshape(-1)
+plt.plot(testPredict_flat)
+plt.legend('Ground Turth','Prediction')
+plt.legend(loc="upper left")
+
+plt.show()
+
+plt.figure(figsize=(10, 5))
+
+plt.plot(Scaled_testY[:48],label="Ground Turth")
+plt.plot(testPredict_flat[:48],label="Prediction")
+#plt.xlabel('Hours')
+plt.ylabel('Traffic')
+plt.legend(loc="upper left")
+
+plt.show()
+
+print(model.summary())
+
+
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+mae = mean_absolute_error(Scaled_trainY, trainPredict_flat)
+print('MAE: %f' % mae)
+mse = mean_squared_error(Scaled_trainY, trainPredict_flat)
+print('MSE: %f' % mse)
+rmse = sqrt(mse)
+print('RMSE: %f' % rmse)
