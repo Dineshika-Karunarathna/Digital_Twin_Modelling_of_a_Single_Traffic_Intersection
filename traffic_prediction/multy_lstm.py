@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import file_handler
 import scaler
 import split_data
+import lstm_mod
 
 
 
@@ -50,3 +51,15 @@ print(testX.shape, testY.shape)
 testY_flat=testY.reshape(-1)
 plt.plot(testY_flat)
 plt.show()
+
+
+
+# define model
+learning_rate = 0.1
+batch_size = 64
+epochs=2
+
+
+
+lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+
