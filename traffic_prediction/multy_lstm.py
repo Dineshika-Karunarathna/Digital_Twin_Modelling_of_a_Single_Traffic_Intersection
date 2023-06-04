@@ -16,6 +16,10 @@ import model_eval
 
 dataset=file_handler.get_data('cleanedkaggleTrafic.csv')
 
+dataset.dropna(inplace=True)
+
+
+
 print(dataset)
 plt.plot(dataset)
 plt.show()
@@ -67,7 +71,9 @@ mse_vec=[]
 for learning_rate in np.arange(0.01,0.1,0.01):
     learning_r_vec.append(learning_rate)
 
-    model=lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+    #model=lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+    model=lstm_mod.stacked_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+
 
     train_predict = model.predict(trainX, verbose=0)
     test_predict = model.predict(testX, verbose=0)

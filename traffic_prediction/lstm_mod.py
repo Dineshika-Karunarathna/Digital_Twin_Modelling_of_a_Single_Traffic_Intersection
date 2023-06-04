@@ -32,3 +32,26 @@ def  uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,train
     x_input = x_input.reshape((1, n_steps, n_features))'''
 
     return model
+
+def  stacked_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY):
+         
+        # define model
+        
+    
+        model = Sequential()
+        model.add(LSTM(24, activation='relu', return_sequences=True, input_shape=(n_steps, n_features)))
+        model.add(LSTM(24, activation='relu'))
+        model.add(Dense(1))
+        model.compile(optimizer='adam', loss='mse',metrics=['MeanSquaredError'])
+        # fit model
+        #model.fit(X, y, epochs=5, verbose=0,callbacks=[tensorboard_callback])
+        hist=model.fit(trainX, trainY ,epochs=epochs, batch_size=batch_size)
+        # demonstrate prediction
+        '''x_input = array([15,13,10,7,9,18,9])
+        x_input=np.reshape(x_input,(-1,1))
+        from sklearn.preprocessing import MinMaxScaler
+        scaler=MinMaxScaler(feature_range=(0,1))
+        x_input=scaler.fit_transform(x_input)
+        x_input = x_input.reshape((1, n_steps, n_features))'''
+    
+        return model
