@@ -22,6 +22,7 @@ def get_data(file_name):
     """Returns the content of the given file name."""
     with open(get_file_path(file_name), 'r') as file:
         traffic_data = pd.read_csv(file,usecols=[2])
+        traffic_data.dropna(inplace=True)
         dataset=traffic_data.values
         #dataset=dataset.astype('float32')
 

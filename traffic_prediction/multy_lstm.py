@@ -16,7 +16,7 @@ import model_eval
 
 dataset=file_handler.get_data('cleanedkaggleTrafic.csv')
 
-dataset.dropna(inplace=True)
+
 
 
 
