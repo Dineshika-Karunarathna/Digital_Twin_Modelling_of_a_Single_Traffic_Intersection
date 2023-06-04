@@ -10,6 +10,7 @@ import file_handler
 import scale
 import split_data
 import lstm_mod
+import model_eval
 
 
 
@@ -60,7 +61,7 @@ plt.show()
 # define model
 learning_rate = 0.1
 batch_size = 64
-epochs=2
+epochs=20
 
 
 
@@ -114,14 +115,13 @@ plt.show()
 
 print(model.summary())
 
+print('Train')
+model_eval.mae(Scaled_trainY,trainPredict_flat)
+model_eval.mse(Scaled_trainY,trainPredict_flat)
+model_eval.rmse(Scaled_trainY,trainPredict_flat)
+print('Test')
+model_eval.mae(Scaled_testY,testPredict_flat)
+model_eval.mse(Scaled_testY,testPredict_flat)
+model_eval.rmse(Scaled_testY,testPredict_flat)
 
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_squared_error
-from math import sqrt
-mae = mean_absolute_error(Scaled_trainY, trainPredict_flat)
-print('MAE: %f' % mae)
-mse = mean_squared_error(Scaled_trainY, trainPredict_flat)
-print('MSE: %f' % mse)
-rmse = sqrt(mse)
-print('RMSE: %f' % rmse)
+
