@@ -59,69 +59,76 @@ plt.show()
 
 
 # define model
-learning_rate = 0.1
+learning_rate = 0.01
 batch_size = 64
 epochs=20
+learning_r_vec=[]
+mse_vec=[]
+for learning_rate in np.arange(0.01,0.1,0.01):
+    learning_r_vec.append(learning_rate)
+
+    model=lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+
+    train_predict = model.predict(trainX, verbose=0)
+    test_predict = model.predict(testX, verbose=0)
+
+    print(train_predict)
 
 
+    Scaled_trainPredict = scaler.inverse_transform(train_predict)
+    Scaled_trainY = scaler.inverse_transform(trainY)
+    Scaled_testPredict = scaler.inverse_transform(test_predict)
+    Scaled_testY = scaler.inverse_transform(testY)
 
-model=lstm_mod.uni_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
+    trainY_flat=Scaled_trainY.reshape(-1)
+    plt.plot(trainY_flat)
 
-train_predict = model.predict(trainX, verbose=0)
-test_predict = model.predict(testX, verbose=0)
+    trainPredict_flat=Scaled_trainPredict.reshape(-1)
+    plt.plot(trainPredict_flat)
+    plt.legend('Ground Turth','Prediction')
+    #plt.show()
 
-print(train_predict)
 
+    plt.figure(figsize=(10, 5))
+    plt.plot(Scaled_trainY[:48], label="Ground Turth")
+    plt.plot(trainPredict_flat[:48],label="Prediction")
+    plt.legend(loc="upper left")
 
-Scaled_trainPredict = scaler.inverse_transform(train_predict)
-Scaled_trainY = scaler.inverse_transform(trainY)
-Scaled_testPredict = scaler.inverse_transform(test_predict)
-Scaled_testY = scaler.inverse_transform(testY)
+    #plt.show()
 
-trainY_flat=Scaled_trainY.reshape(-1)
-plt.plot(trainY_flat)
+    testY_flat=Scaled_testY.reshape(-1)
+    plt.plot(testY_flat)
+    testPredict_flat=Scaled_testPredict.reshape(-1)
+    plt.plot(testPredict_flat)
+    plt.legend('Ground Turth','Prediction')
+    plt.legend(loc="upper left")
 
-trainPredict_flat=Scaled_trainPredict.reshape(-1)
-plt.plot(trainPredict_flat)
-plt.legend('Ground Turth','Prediction')
+    #plt.show()
+
+    plt.figure(figsize=(10, 5))
+
+    plt.plot(Scaled_testY[:48],label="Ground Turth")
+    plt.plot(testPredict_flat[:48],label="Prediction")
+    #plt.xlabel('Hours')
+    plt.ylabel('Traffic')
+    plt.legend(loc="upper left")
+
+    #plt.show()
+
+    print(model.summary())
+
+    print('Train')
+    model_eval.mae(Scaled_trainY,trainPredict_flat)
+    model_eval.mse(Scaled_trainY,trainPredict_flat)
+    model_eval.rmse(Scaled_trainY,trainPredict_flat)
+    print('Test')
+    model_eval.mae(Scaled_testY,testPredict_flat)
+    model_eval.mse(Scaled_testY,testPredict_flat)
+    model_eval.rmse(Scaled_testY,testPredict_flat)
+    mse_vec.append(model_eval.mse(Scaled_testY,testPredict_flat))
+
+plt.plot(learning_r_vec,mse_vec)
 plt.show()
-
-
-plt.figure(figsize=(10, 5))
-plt.plot(Scaled_trainY[:48], label="Ground Turth")
-plt.plot(trainPredict_flat[:48],label="Prediction")
-plt.legend(loc="upper left")
-
-plt.show()
-
-testY_flat=Scaled_testY.reshape(-1)
-plt.plot(testY_flat)
-testPredict_flat=Scaled_testPredict.reshape(-1)
-plt.plot(testPredict_flat)
-plt.legend('Ground Turth','Prediction')
-plt.legend(loc="upper left")
-
-plt.show()
-
-plt.figure(figsize=(10, 5))
-
-plt.plot(Scaled_testY[:48],label="Ground Turth")
-plt.plot(testPredict_flat[:48],label="Prediction")
-#plt.xlabel('Hours')
-plt.ylabel('Traffic')
-plt.legend(loc="upper left")
-
-plt.show()
-
-print(model.summary())
-
-print('Train')
-model_eval.mae(Scaled_trainY,trainPredict_flat)
-model_eval.mse(Scaled_trainY,trainPredict_flat)
-model_eval.rmse(Scaled_trainY,trainPredict_flat)
-print('Test')
-model_eval.mae(Scaled_testY,testPredict_flat)
-model_eval.mse(Scaled_testY,testPredict_flat)
-model_eval.rmse(Scaled_testY,testPredict_flat)
-
+print(learning_r_vec)
+print(mse_vec)
 
