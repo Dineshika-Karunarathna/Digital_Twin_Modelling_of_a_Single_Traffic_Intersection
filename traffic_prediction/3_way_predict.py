@@ -107,4 +107,8 @@ for i, phase in enumerate(['N_S', 'N_W', 'S_N', 'S_W', 'W_N', 'W_S']):
     model_eval.mse(Scaled_testY,testPredict_flat)
     model_eval.rmse(Scaled_testY,testPredict_flat)
 
-print(predictions)
+print(type(predictions['N_S']))
+df = pd.DataFrame(predictions)
+df.to_csv('output.csv', index=True)
+
+
