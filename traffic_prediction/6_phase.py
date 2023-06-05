@@ -6,11 +6,13 @@ from keras.layers import LSTM
 from keras.layers import Dense
 import pandas as pd
 import matplotlib.pyplot as plt
+import pickle
 import file_handler
 import scale
 import split_data
 import lstm_mod
 import model_eval
+import os
 
 
 
@@ -140,11 +142,23 @@ for i, phase in enumerate(['N_S', 'N_W', 'S_N', 'S_W', 'W_N', 'W_S']):
     testX.append(testx)
     testY.append(testy)
 
+#folder_path = '\Models\weights'
+folder_path = 'D:\Acedamic\FYP\Codes\DTMSTI\Digital_Twin_Modelling_of_a_Single_Traffic_Intersection\\traffic_prediction\Models\weights'
 
+os.makedirs(folder_path, exist_ok=True)
 
 for i, phase in enumerate(['N_S', 'N_W', 'S_N', 'S_W', 'W_N', 'W_S']):
     model=lstm_mod.stacked_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX[i],trainY[i])
     models[phase] = model
+
+    filename = f'model_{i}.pkl'
+    file_path = os.path.join(folder_path, filename)
+    with open(file_path, 'wb') as file:
+        pickle.dump(model, file)
+
+
+
+
     print(trainX[i].shape)
     print(model.summary())
     train_predict=model.predict(trainX[i])
@@ -223,6 +237,9 @@ for i, phase in enumerate(['N_S', 'N_W', 'S_N', 'S_W', 'W_N', 'W_S']):
     # trainX,trainY,testX,testY=split(n_steps,N_S)
     # model=lstm_mod.stacked_train(learning_rate, batch_size ,epochs,n_steps,n_features,trainX,trainY)
 
+
+print(predictions['N_S'])
+print(predictions['N_W'])
 
 
 
