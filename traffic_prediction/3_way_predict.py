@@ -29,7 +29,7 @@ for i in range(6):
 for i in range(6):
     data[i]=Scalers[i].fit_transform(data[i].reshape(-1,1))
 
-n_steps=39
+n_steps=37
 n_features = 1
 
 def split(n_steps,dataset):
@@ -92,8 +92,8 @@ for i, phase in enumerate(['N_S', 'N_W', 'S_N', 'S_W', 'W_N', 'W_S']):
 
     plt.figure(figsize=(10, 5))
 
-    plt.plot(Scaled_testY[:48],label="Ground Turth")
-    plt.plot(testPredict_flat[:48],label="Prediction")
+    plt.plot(Scaled_testY[:39],label="Ground Turth")
+    plt.plot(testPredict_flat[:39],label="Prediction")
     #plt.xlabel('Hours')
     plt.ylabel('Traffic')
     plt.legend(loc="upper left")
