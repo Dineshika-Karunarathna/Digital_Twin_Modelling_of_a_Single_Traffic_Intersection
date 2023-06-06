@@ -123,9 +123,9 @@ def split(n_steps,dataset):
     plt.show()
     return trainX,trainY,testX,testY
 
-learning_rate = 0.06
-batch_size = 8
-epochs=2
+learning_rate = 0.01
+batch_size = 32
+epochs=20
 
 trainX=[]
 trainY=[]
