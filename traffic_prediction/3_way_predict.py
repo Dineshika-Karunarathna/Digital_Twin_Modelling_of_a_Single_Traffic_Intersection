@@ -159,6 +159,7 @@ def future_10_process(last_10_rows):
             model = pickle.load(file)
         
         last_10 = data[i]
+        print(last_10.shape)
         for j in range(10):
             last_prediction=model.predict(last_10)
             predictions_10.append(last_prediction)
@@ -172,7 +173,7 @@ def future_10_process(last_10_rows):
         print(last_prediction)
         
 
-        Scaled_predictions_10 = Scalers[i].inverse_transform(predictions_10)
+        Scaled_predictions_10 = Scalers[i].inverse_transform(predictions_10[i])
         Scaled_predictions_10_flat=Scaled_predictions_10.reshape(-1)
         plt.plot(Scaled_predictions_10_flat)
         predictions[phase] = Scaled_predictions_10_flat
@@ -195,8 +196,8 @@ def future_10_start(predictions):
 def test():
     future_10_process(read_last_10_rows())
     return 'Done'
-#test()
-predict_all()
+test()
+#predict_all()
 
     
 
