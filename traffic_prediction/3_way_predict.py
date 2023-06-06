@@ -166,8 +166,8 @@ def future_10_process(last_10_rows):
             last_10 = last_10[1:]
 
         print(predictions_10)
-        print(predictions_10.shape)
-        print(predictions_10[0].shape)
+        #print(predictions_10.shape)
+        #print(predictions_10[0].shape)
         print(predictions_10[0])
         print(last_prediction)
         
@@ -195,8 +195,8 @@ def future_10_start(predictions):
 def test():
     future_10_process(read_last_10_rows())
     return 'Done'
-test()
-#predict_all()
+#test()
+predict_all()
 
     
 
